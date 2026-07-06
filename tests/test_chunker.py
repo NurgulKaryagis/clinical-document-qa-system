@@ -20,53 +20,53 @@ def make_table(text: str):
     return make_element("Table", text)
 
 
-# --- Senaryo 1: Normal PDF, title'lar var ---
+# --- Scenario 1: Normal PDF with titles ---
 
 def test_two_sections_correct_content():
     elements = [
-        make_title("Dozaj"),
+        make_title("Dosage"),
         make_narrative("500mg"),
-        make_narrative("günde 2 kez"),
-        make_title("Yan Etkiler"),
-        make_narrative("Bulantı"),
+        make_narrative("twice daily"),
+        make_title("Side Effects"),
+        make_narrative("Nausea"),
     ]
     chunks = chunk_by_sections(elements)
 
     assert len(chunks) == 2
-    assert chunks[0].section_title == "Dozaj"
+    assert chunks[0].section_title == "Dosage"
     assert "500mg" in chunks[0].content
-    assert "günde 2 kez" in chunks[0].content
-    assert chunks[1].section_title == "Yan Etkiler"
-    assert chunks[1].content == "Bulantı"
+    assert "twice daily" in chunks[0].content
+    assert chunks[1].section_title == "Side Effects"
+    assert chunks[1].content == "Nausea"
 
 
 def test_section_title_not_in_content():
     elements = [
-        make_title("Kontrendikasyonlar"),
-        make_narrative("Böbrek yetmezliğinde kullanılmaz."),
+        make_title("Contraindications"),
+        make_narrative("Do not use in patients with renal failure."),
     ]
     chunks = chunk_by_sections(elements)
 
-    assert "Kontrendikasyonlar" not in chunks[0].content
-    assert chunks[0].section_title == "Kontrendikasyonlar"
+    assert "Contraindications" not in chunks[0].content
+    assert chunks[0].section_title == "Contraindications"
 
 
 def test_section_title_in_metadata():
     elements = [
-        make_title("Endikasyonlar"),
-        make_narrative("Tip 2 diyabet tedavisinde kullanılır."),
+        make_title("Indications"),
+        make_narrative("Used in the treatment of type 2 diabetes."),
     ]
     chunks = chunk_by_sections(elements)
 
-    assert chunks[0].metadata["section"] == "Endikasyonlar"
+    assert chunks[0].metadata["section"] == "Indications"
 
 
-# --- Senaryo 2: Title yok, fallback ---
+# --- Scenario 2: No titles, fallback ---
 
 def test_fallback_when_no_titles():
     elements = [
-        make_narrative("Birinci paragraf."),
-        make_narrative("İkinci paragraf."),
+        make_narrative("First paragraph."),
+        make_narrative("Second paragraph."),
     ]
     chunks = chunk_by_sections(elements)
 
@@ -75,19 +75,19 @@ def test_fallback_when_no_titles():
 
 
 def test_fallback_section_title_is_unknown():
-    elements = [make_narrative("Herhangi bir metin.")]
+    elements = [make_narrative("Some text.")]
     chunks = chunk_by_sections(elements)
 
     assert chunks[0].section_title == "Unknown Section"
 
 
-# --- Senaryo 3: Table ayrı chunk ---
+# --- Scenario 3: Table gets its own chunk ---
 
 def test_table_gets_own_chunk():
     elements = [
-        make_title("Dozaj Tablosu"),
-        make_narrative("Aşağıdaki tabloya bakınız."),
-        make_table("Doz | Frekans\n500mg | 2x"),
+        make_title("Dosage Table"),
+        make_narrative("See the table below."),
+        make_table("Dose | Frequency\n500mg | 2x"),
     ]
     chunks = chunk_by_sections(elements)
 
@@ -98,19 +98,19 @@ def test_table_gets_own_chunk():
 
 def test_table_metadata_has_element_type():
     elements = [
-        make_title("Farmakokinetik"),
-        make_table("T1/2 | 6 saat"),
+        make_title("Pharmacokinetics"),
+        make_table("T1/2 | 6 hours"),
     ]
     chunks = chunk_by_sections(elements)
 
     assert any(c.metadata.get("element_type") == "table" for c in chunks)
 
 
-# --- Senaryo 4: Boş metin görmezden gelinir ---
+# --- Scenario 4: Empty text elements are ignored ---
 
 def test_empty_text_elements_ignored():
     elements = [
-        make_title("Dozaj"),
+        make_title("Dosage"),
         make_narrative("   "),
         make_narrative("500mg"),
     ]

@@ -1,69 +1,76 @@
 # ADR-001: Chunking Strategy — Section Boundary Detection
 
 ## Status
+
 Accepted
 
 ## Context
-Klinik protokoller, ilaç prospektüsleri ve tıbbi kılavuzlar bölüm bazlı
-yapılandırılmış dokümanlardır (Endikasyonlar, Dozaj, Yan Etkiler, vb.).
-Sistemin temel kuralı: bölüm içerikleri chunk'lara karışmamalı, her chunk
-tek bir bölümden gelmeli, bölüm başlığı metadata olarak saklanmalı.
 
-Soru: Unstructured.io çıktısından bölüm sınırlarını nasıl tespit edeceğiz?
+Clinical protocols, drug leaflets, and medical guidelines are section-structured
+documents (Indications, Dosage, Side Effects, Contraindications, etc.).
+The system's core constraint: section content must not be mixed across chunks.
+Each chunk must belong to a single section, with the section title stored as metadata.
+
+The question: how do we detect section boundaries from Unstructured.io output?
 
 ## Decision
-Unstructured.io'nun kendi element tiplerine güveniyoruz.
-`Title` elementi → yeni chunk başlat.
-`NarrativeText` ve `Table` elementleri → mevcut bölüme ekle.
-Ekstra post-processing yok.
+
+Trust Unstructured.io's own element types.
+`Title` element → start a new chunk.
+`NarrativeText` and `Table` elements → append to the current section.
+No additional post-processing.
 
 ## Options Considered
 
-### Option A: Unstructured element tiplerine güven (Seçilen)
-- Pros:
-  - Kod minimal, bakım yükü düşük
-  - Klinik dokümanlar genellikle iyi yapılandırılmış — Unstructured tespiti yeterli
-  - Hızlı itere edilebilir; sorun çıkarsa B'ye geçmek kolay
-- Cons:
-  - Kötü taranmış veya düzensiz PDF'lerde `Title` tespiti hatalı olabilir
-  - Unstructured'ın kararlarına bağımlıyız
+### Option A: Trust Unstructured element types (Selected)
 
-### Option B: Unstructured + özel post-processing
 - Pros:
-  - Daha kontrollü: kısa `Title`'lar gerçek başlık, `Table`'lar her zaman ayrı chunk
-  - Unstructured hatalı tespit etse bile düzeltilebilir
+  - Minimal code, low maintenance overhead
+  - Clinical documents are typically well-structured — Unstructured detection is sufficient
+  - Easy to iterate; switching to Option B is straightforward if issues arise
 - Cons:
-  - Ekstra kod = ekstra karmaşıklık
-  - Klinik dokümanlar için şu an gerekli değil
+  - `Title` detection may be inaccurate for poorly scanned or malformatted PDFs
+  - We depend on Unstructured's classification quality
 
-### Option C: Kural tabanlı (regex + karakter analizi)
+### Option B: Unstructured + custom post-processing
+
 - Pros:
-  - Unstructured'a bağımlılık yok
+  - More control: short `Title` elements treated as real headings, `Table` always isolated
+  - Recoverable if Unstructured misclassifies
 - Cons:
-  - Kırılgan — her PDF formatı için ayrı kural
-  - Bakım maliyeti yüksek
+  - Extra code and complexity
+  - Not necessary for well-structured clinical documents at this stage
 
-### Neden Semantic Chunking Değil?
-Semantic chunking anlam kaymasına göre sınır koyar, başlıklara göre değil.
-Klinik dokümanlarda "Metformin günde 2 kez alınır" ve "Böbrek yetmezliğinde
-kontrendikedir" cümleleri anlamca yakın görünebilir — ama biri Dozaj,
-diğeri Kontrendikasyon bölümünde. Semantic chunking bunları birleştirebilir.
-Bu projenin hard rule'u: bölüm içerikleri karışmamalı. Semantic chunking bu
-kuralı ihlal etme riskini taşıdığı için değerlendirmeye alınmadı.
+### Option C: Rule-based (regex + character analysis)
+
+- Pros:
+  - No dependency on Unstructured's classification
+- Cons:
+  - Brittle — requires separate rules per PDF format
+  - High maintenance cost
+
+### Why Not Semantic Chunking?
+
+Semantic chunking splits by meaning shift, not by headings. In clinical documents,
+"Metformin 500mg taken twice daily" and "Contraindicated in renal failure" may appear
+semantically close — but they belong to different sections (Dosage vs. Contraindications).
+Semantic chunking risks merging them. This violates the hard rule: section content must
+not be mixed across chunks. It was excluded from consideration on that basis.
 
 ## Reasoning
-Klinik dokümanlar yapılandırılmış belgelerdir ve Unstructured.io bu tür
-belgeler için optimize edilmiştir. Şu an için A yeterli; eğer gerçek
-dokümanlarla test sırasında `Title` tespiti yetersiz kalırsa B'ye geçmek
-kolaydır. Gereksiz erken karmaşıklıktan kaçınıyoruz.
+
+Clinical documents are structured documents and Unstructured.io is optimized for them.
+Option A is sufficient for now. If real-document testing reveals weak `Title` detection,
+migrating to Option B is low-cost. Avoiding premature complexity.
 
 ## Consequences
-- Unstructured.io'nun element tespiti pipeline'ın doğruluğunu doğrudan etkiler
-- İlk testlerde `Title` elementlerini gözlemleyerek tespit kalitesini doğrulamak gerekir
-- Post-processing eklemek her zaman mümkün — bu karar geri alınabilir
+
+- Unstructured.io's element detection directly affects pipeline accuracy
+- `Title` element quality must be verified during initial document testing
+- Adding post-processing later is always possible — this decision is reversible
 
 ## What Would Break If We Changed This
-B veya C'ye geçersek: chunking katmanındaki tüm birim testleri ve
-Unstructured çıktısına dayanan entegrasyon testleri yeniden yazılmalı.
-Weaviate'e yüklenen chunk formatı değişmez, ama chunk sınırları değişir —
-RAGAS faithfulness skorları etkilenebilir.
+
+Switching to Option B or C: all unit tests and integration tests that depend on
+Unstructured output would need to be rewritten. The chunk format stored in Weaviate
+would not change, but chunk boundaries would — RAGAS faithfulness scores could be affected.
