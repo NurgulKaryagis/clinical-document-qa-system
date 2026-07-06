@@ -1,0 +1,34 @@
+# Core
+langchain
+langchain-community
+langchain-cohere
+langchain-weaviate
+openai
+
+# Document parsing
+unstructured
+
+# Vector DB
+weaviate-client
+
+# Cache
+redis
+
+# API
+fastapi
+uvicorn[standard]
+slowapi
+
+# Eval
+ragas
+
+# Tracing
+langsmith
+
+# Testing
+pytest
+pytest-asyncio
+
+# Utils
+python-dotenv
+pydantic

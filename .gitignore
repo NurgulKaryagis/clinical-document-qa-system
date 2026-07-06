@@ -1,0 +1,40 @@
+# Claude
+CLAUDE.md
+CLAUDE.pdf
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# LangSmith / logs
+*.log
+langsmith_traces/
+
+# Docker
+*.override.yml
