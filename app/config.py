@@ -20,5 +20,6 @@ class Settings(BaseSettings):
         "Xarelto"
     ]
 
+    redis_ttl_seconds: int = 3 * 60 * 60
 
 settings = Settings()
