@@ -16,5 +16,9 @@ class Settings(BaseSettings):
     hybrid_alpha: float = 0.40
     top_k: int = 10
 
+    allowlist: list = [
+        "Xarelto"
+    ]
+
 
 settings = Settings()

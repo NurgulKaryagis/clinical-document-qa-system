@@ -33,3 +33,7 @@ pytest-asyncio
 python-dotenv
 pydantic
 pydantic-settings
+
+# PII detection
+presidio-analyzer
+spacy<3.8
