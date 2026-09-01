@@ -6,9 +6,7 @@ from langchain_weaviate import WeaviateVectorStore
 from langchain_core.documents import Document
 from langchain_openai import OpenAIEmbeddings
 
-
-HYBRID_ALPHA = 0.40
-TOP_K = 10
+from app.config import settings
 
 
 @dataclass
@@ -32,12 +30,12 @@ def build_retriever(client: weaviate.WeaviateClient, index_name: str) -> Weaviat
 def hybrid_search(
     store: WeaviateVectorStore,
     query: str,
-    k: int = TOP_K,
+    k: int = settings.top_k,
 ) -> List[RetrievedChunk]:
     results: List[tuple[Document, float]] = store.similarity_search_with_score(
         query=query,
         k=k,
-        alpha=HYBRID_ALPHA,
+        alpha=settings.hybrid_alpha,
     )
     return [
         RetrievedChunk(

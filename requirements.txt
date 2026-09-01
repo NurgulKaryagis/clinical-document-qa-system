@@ -32,3 +32,4 @@ pytest-asyncio
 # Utils
 python-dotenv
 pydantic
+pydantic-settings

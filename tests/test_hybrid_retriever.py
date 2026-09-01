@@ -2,9 +2,8 @@ from unittest.mock import MagicMock
 
 from langchain_core.documents import Document
 
+from app.config import settings
 from app.retrieval.hybrid_retriever import (
-    HYBRID_ALPHA,
-    TOP_K,
     RetrievedChunk,
     hybrid_search,
 )
@@ -25,8 +24,8 @@ def test_hybrid_search_passes_configured_alpha():
 
     store.similarity_search_with_score.assert_called_once_with(
         query="metformin dosage",
-        k=TOP_K,
-        alpha=HYBRID_ALPHA,
+        k=settings.top_k,
+        alpha=settings.hybrid_alpha,
     )
 
 
@@ -38,7 +37,7 @@ def test_hybrid_search_passes_custom_k():
     store.similarity_search_with_score.assert_called_once_with(
         query="metformin dosage",
         k=3,
-        alpha=HYBRID_ALPHA,
+        alpha=settings.hybrid_alpha,
     )
 
 
