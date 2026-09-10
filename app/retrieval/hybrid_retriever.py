@@ -1,13 +1,12 @@
 from dataclasses import dataclass
-from typing import List
-import numpy as np
 
+import numpy as np
 import weaviate
-from langchain_weaviate import WeaviateVectorStore
+from langchain_cohere.rerank import CohereRerank
+from langchain_community.vectorstores.utils import maximal_marginal_relevance
 from langchain_core.documents import Document
 from langchain_openai import OpenAIEmbeddings
-from langchain_community.vectorstores.utils import maximal_marginal_relevance
-from langchain_cohere.rerank import CohereRerank
+from langchain_weaviate import WeaviateVectorStore
 
 from app.config import settings
 
@@ -37,8 +36,8 @@ def hybrid_search(
     store: WeaviateVectorStore,
     query: str,
     k: int = settings.top_k,
-) -> List[RetrievedChunk]:
-    results: List[tuple[Document, float]] = store.similarity_search_with_score(
+) -> list[RetrievedChunk]:
+    results: list[tuple[Document, float]] = store.similarity_search_with_score(
         query=query,
         k=k,
         alpha=settings.hybrid_alpha,
@@ -58,9 +57,9 @@ def mmr_search(
     store:WeaviateVectorStore, 
     query: str,
     k: int = settings.mmr_fetch_k,
-    ) -> List[RetrievedChunk]:
+    ) -> list[RetrievedChunk]:
     query_embedding = np.array(store.embeddings.embed_query(query))
-    results : List[tuple[Document, float]] = store.similarity_search_with_score(
+    results : list[tuple[Document, float]] = store.similarity_search_with_score(
         query=query,
         k=k,
         alpha=settings.hybrid_alpha,
@@ -99,8 +98,8 @@ def build_reranker(
 def rerank_results(
     reranker: CohereRerank,
     query: str,
-    chunks: List[RetrievedChunk]
-) -> List[RetrievedChunk]:
+    chunks: list[RetrievedChunk]
+) -> list[RetrievedChunk]:
     documents = [ Document(page_content=doc.content, metadata=doc.metadata) for doc in chunks]
     results = reranker.compress_documents(
         documents=documents,

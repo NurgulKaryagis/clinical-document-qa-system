@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
-from typing import List
-from unstructured.documents.elements import Element, Title, Table
+
+from unstructured.documents.elements import Element, Table, Title
 
 
 @dataclass
@@ -10,15 +10,15 @@ class SectionChunk:
     metadata: dict = field(default_factory=dict)
 
 
-def chunk_by_sections(elements: List[Element]) -> List[SectionChunk]:
+def chunk_by_sections(elements: list[Element]) -> list[SectionChunk]:
     has_titles = any(isinstance(el, Title) for el in elements)
 
     if not has_titles:
         return _fallback_paragraph_chunks(elements)
 
-    chunks: List[SectionChunk] = []
+    chunks: list[SectionChunk] = []
     current_title = "Unknown Section"
-    current_texts: List[str] = []
+    current_texts: list[str] = []
 
     for element in elements:
         if isinstance(element, Title):
@@ -47,7 +47,7 @@ def chunk_by_sections(elements: List[Element]) -> List[SectionChunk]:
     return chunks
 
 
-def _build_chunk(title: str, texts: List[str]) -> SectionChunk:
+def _build_chunk(title: str, texts: list[str]) -> SectionChunk:
     return SectionChunk(
         section_title=title,
         content="\n\n".join(texts),
@@ -55,7 +55,7 @@ def _build_chunk(title: str, texts: List[str]) -> SectionChunk:
     )
 
 
-def _fallback_paragraph_chunks(elements: List[Element]) -> List[SectionChunk]:
+def _fallback_paragraph_chunks(elements: list[Element]) -> list[SectionChunk]:
     return [
         SectionChunk(
             section_title="Unknown Section",

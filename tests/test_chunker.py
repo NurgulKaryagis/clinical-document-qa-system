@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock
-from app.chunking.section_chunker import chunk_by_sections, SectionChunk
+
+from app.chunking.section_chunker import chunk_by_sections
 
 
 def make_element(type_name: str, text: str):

@@ -1,8 +1,6 @@
-from unittest.mock import MagicMock
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from langchain_core.documents import Document
-from langchain_community.vectorstores.utils import maximal_marginal_relevance
 
 from app.config import settings
 from app.retrieval.hybrid_retriever import (

@@ -1,8 +1,9 @@
 
-from redis import Redis
 from langchain_community.cache import RedisCache
+from redis import Redis
 
 from app.config import settings
+
 
 def build_cache(client: Redis) -> RedisCache:
     return RedisCache(

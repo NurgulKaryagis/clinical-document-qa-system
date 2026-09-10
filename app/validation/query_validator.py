@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from presidio_analyzer import AnalyzerEngine
 from presidio_analyzer.nlp_engine import NlpEngineProvider
@@ -18,7 +17,7 @@ ALLOWLIST = {name.lower() for name in settings.allowlist}
 @dataclass
 class QueryValidationResult:
     is_valid: bool
-    rejection_message: Optional[str] = None
+    rejection_message: str | None = None
 
 def validate_query(query: str) -> QueryValidationResult:
     results = analyzer.analyze(text=query, language="en")
