@@ -26,4 +26,7 @@ class Settings(BaseSettings):
     rerank_top_n: int = 8
     rerank_model : str = "rerank-english-v3.0"
     
+    confidence_threshold: float = 0.7
+    fallback_message: str = "I don't have sufficiently reliable information in the available documents to answer this question with confidence. Please consult the official drug leaflet or a clinical pharmacist."
+
 settings = Settings()
