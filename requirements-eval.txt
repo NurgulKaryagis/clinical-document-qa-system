@@ -1,0 +1,19 @@
+# Isolated dependency set for RAGAS evaluation (CI only).
+#
+# ragas 0.4.3 (the latest available) still hard-imports a VertexAI
+# integration that langchain-community has since removed, and only
+# resolves cleanly against the older 0.3.x LangChain line. That line is
+# incompatible with the 1.x LangChain line the app itself depends on
+# (requirements.txt) - installing both in one environment breaks the app's
+# dependencies. RAGAS eval never runs inside the live app; it only runs as
+# a separate CI step, so it gets its own venv and its own pinned versions
+# here instead of forcing a project-wide downgrade. See ADR-008.
+
+ragas==0.4.3
+langchain==0.3.30
+langchain-community==0.3.27
+langchain-core==0.3.86
+langchain-openai==0.3.35
+openai==1.109.1
+python-dotenv
+pytest
