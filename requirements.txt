@@ -36,4 +36,4 @@ pydantic-settings
 
 # PII detection
 presidio-analyzer
-spacy<3.8
+spacy

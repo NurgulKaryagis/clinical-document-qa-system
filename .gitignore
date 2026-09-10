@@ -3,6 +3,8 @@ CLAUDE.md
 CLAUDE.pdf
 CLAUDE_tmp.html
 .claude/
+docs/sessions/
+docs/known-gaps.md
 
 # Python
 __pycache__/
