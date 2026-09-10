@@ -64,6 +64,26 @@ the updated document).
     or buggy invalidation path serves stale clinical data for up to 24 hours.
   - Unacceptable risk given "wrong answers have real consequences"
 
+### Option D: RedisSemanticCache (similarity-based matching) instead of exact-match RedisCache
+
+- Pros:
+  - Higher cache hit rate — catches paraphrased queries that plain
+    `RedisCache`'s exact hash match would miss entirely
+- Cons:
+  - Introduces an error class this domain cannot tolerate: two structurally
+    similar questions about two different drugs can embed close enough
+    together to be treated as the same cached question, regardless of how
+    different the drugs actually are. A hit above the similarity threshold
+    would silently return one drug's cached answer for a query about a
+    different drug, with no error raised and no way for the user to detect
+    it. This is a wrong-drug-information failure, not a staleness failure.
+    Plain `RedisCache`'s exact `hash(prompt + llm_string)` key cannot
+    produce this failure mode — two distinct prompts never collide.
+  - `RedisSemanticCache`'s own source carries `# TODO - implement a TTL
+    policy in Redis` — it has no native TTL support, which directly
+    conflicts with this project's hard rule that Redis TTL must always be
+    set.
+
 ### Invalidation granularity: full flush vs. targeted per-document keys
 
 - Targeted (per-document/section key deletion): more efficient, preserves
@@ -102,6 +122,14 @@ invalidation cannot cover:
   (which only fires on document changes).
 - **Unbounded cache growth**: without TTL, memory usage grows indefinitely
   with query volume, regardless of whether any document ever changes.
+
+Option D was rejected on a stricter basis than A/B/C's hit-rate-vs-staleness
+tradeoff: this is not a domain where an approximate cache hit is an
+acceptable risk to trade for a higher hit rate. A wrong-drug-information
+error from a semantic-similarity false match is categorically worse than
+the stale-data risk this ADR otherwise manages — consistent with ADR-002's
+reasoning that exact matching matters more than semantic breadth for
+clinical terminology.
 
 Full-cache-flush invalidation was chosen over targeted invalidation because a
 missed key mapping is a silent failure mode — the exact kind of bug that is
