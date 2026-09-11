@@ -1,4 +1,4 @@
-# ADR-010: IDP Document Classification and Routing
+# ADR-009: IDP Document Classification and Routing
 
 ## Status
 
