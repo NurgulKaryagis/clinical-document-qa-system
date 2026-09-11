@@ -30,17 +30,5 @@ class Settings(BaseSettings):
     fallback_message: str = "I don't have sufficiently reliable information in the available documents to answer this question with confidence. Please consult the official drug leaflet or a clinical pharmacist."
 
     idp_classifier_model: str = "gpt-4o-mini"
-    CLASSIFICATION_PROMPT:str = """You are classifying a clinical document based on its section titles.
-
-                            The document's section titles, in order, are:
-                            {titles}
-
-                            Classify the document into exactly one of these categories:
-                            - drug_leaflet: a drug/medication package insert — sections like dosage, contraindications, side effects, indications
-                            - clinical_protocol: a clinical treatment protocol or guideline — sections like diagnosis criteria, treatment steps, follow-up
-                            - lab_report: a laboratory or diagnostic report — test results, reference ranges, measurements
-                            - unclassified: none of the above clearly fit, or the titles are too sparse or ambiguous to tell
-
-                            Choose the single best-fitting category. If you are not confident, choose unclassified rather than guessing."""
 
 settings = Settings()
