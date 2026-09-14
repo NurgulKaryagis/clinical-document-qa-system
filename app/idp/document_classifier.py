@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import Literal
 
 from langchain_openai import ChatOpenAI
-from openai import OpenAI
 from pydantic import BaseModel
 from unstructured.documents.elements import Element, NarrativeText, Table, Title
 
@@ -55,13 +54,11 @@ class GenreClassification(BaseModel):
 def classify_genre_llm(elements: list[Element]) -> GenreClassification:
     titles = ",".join(element.text.strip() for element in elements if isinstance(element, Title))
     
-    api_key = None or settings.openai_api_key
-    client = OpenAI(api_key=api_key)
     return ChatOpenAI(
                 model=settings.idp_classifier_model,
                 temperature=0,
                 max_retries=2,
-                client=client
+                api_key=settings.openai_api_key,
             ).with_structured_output(GenreClassification).invoke(CLASSIFICATION_PROMPT.format(titles=titles))
 
 def classify_document(elements: list[Element]) -> ClassificationResult:

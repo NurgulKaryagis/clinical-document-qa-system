@@ -2,6 +2,7 @@
 langchain
 langchain-community
 langchain-cohere
+langchain-openai
 langchain-weaviate
 openai
 
@@ -19,8 +20,7 @@ fastapi
 uvicorn[standard]
 slowapi
 
-# Eval
-ragas
+# Eval: ragas lives in requirements-eval.txt (incompatible with the LangChain line below)
 
 # Tracing
 langsmith
