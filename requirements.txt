@@ -40,3 +40,7 @@ pydantic-settings
 # PII detection
 presidio-analyzer
 spacy
+
+# Auth / relational DB
+sqlalchemy
+psycopg2-binary
