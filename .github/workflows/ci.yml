@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Download spaCy model for PII detection
+        run: python -m spacy download en_core_web_sm
+        env:
+          PRESIDIO_SPACY_MODEL: en_core_web_sm
+
+      - name: Lint with ruff
+        run: ruff check app/ tests/ eval/
+
+      - name: Run tests
+        run: pytest tests/ -v
+        env:
+          PRESIDIO_SPACY_MODEL: en_core_web_sm
+
+  eval-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install eval dependencies (isolated from the app's requirements.txt)
+        run: pip install -r requirements-eval.txt
+
+      - name: Run eval tests
+        run: pytest eval/tests/ -v
