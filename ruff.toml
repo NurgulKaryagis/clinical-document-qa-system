@@ -1,0 +1,2 @@
+# Pin the target so local and CI ruff apply the same version-dependent rules.
+target-version = "py312"

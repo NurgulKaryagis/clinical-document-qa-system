@@ -1,5 +1,5 @@
 import enum
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import DateTime, Enum, ForeignKey, String, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -16,7 +16,7 @@ class Role(str, enum.Enum):
 
 
 def default_expiry() -> datetime:
-    return datetime.now(timezone.utc) + timedelta(days=90)
+    return datetime.now(UTC) + timedelta(days=90)
 
 
 class User(Base):
