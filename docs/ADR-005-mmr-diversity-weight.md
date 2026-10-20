@@ -28,9 +28,9 @@ section (e.g., Contraindications) never makes it into the pool at all.
 
 As with ADR-002's `alpha`, there is no real clinical document corpus or RAGAS
 evaluation pipeline yet to empirically tune this value. This decision fixes
-a reasoned **direction**, not a validated final number — already logged in
-`docs/known-gaps.md` alongside `alpha` and the future RAGAS threshold as
-values requiring re-validation once real documents and RAGAS scoring exist.
+a reasoned **direction**, not a validated final number. Like `alpha` and the
+RAGAS threshold, it must be re-validated once real documents and RAGAS
+scoring exist.
 
 ## Decision
 
@@ -97,9 +97,9 @@ the query.
   from one section
 - Some marginally relevant chunks may occupy pool slots; this is expected to
   be corrected by Cohere Rerank, not by MMR itself
-- `lambda_mult = 0.3` is a reasoned starting point, not a tuned value — see
-  `docs/known-gaps.md` for the required re-validation once real documents
-  and a RAGAS evaluation pipeline exist
+- `lambda_mult = 0.3` is a reasoned starting point, not a tuned value — it
+  must be re-validated once real documents and a RAGAS evaluation pipeline
+  exist
 - This decision assumes Cohere Rerank is not skipped (already a hard rule in
   the project) — if Rerank were ever removed, this diversity-leaning setting
   would need to be revisited, since nothing would then correct for

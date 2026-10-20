@@ -28,7 +28,8 @@ mitigates this: the most relevant chunk is always first regardless of
 As with `alpha` (ADR-002) and `lambda_mult` (ADR-005), there is no real
 clinical document corpus yet to determine empirically how many sections a
 typical query actually needs. This is a reasoned starting point, not a
-validated number — logged in `docs/known-gaps.md` alongside the other two.
+validated number, and like the other two it must be re-validated once real
+documents exist.
 
 ## Decision
 
@@ -73,9 +74,8 @@ while keeping the same reasoning as Option C.
 
 - The LLM's context will typically include content from multiple sections
   per query, not a single narrowly-focused chunk set
-- `top_n = 8` is a reasoned starting point, not a tuned value — added to
-  `docs/known-gaps.md` for re-validation once real documents and a RAGAS
-  evaluation pipeline exist
+- `top_n = 8` is a reasoned starting point, not a tuned value — it must be
+  re-validated once real documents and a RAGAS evaluation pipeline exist
 - Larger `top_n` increases per-query LLM cost and latency compared to a
   narrower value; this tradeoff has not been measured against real usage yet
 
