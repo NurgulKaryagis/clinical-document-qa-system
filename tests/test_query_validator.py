@@ -1,8 +1,14 @@
 from unittest.mock import patch
 
+import pytest
 from presidio_analyzer import RecognizerResult
 
-from app.validation.query_validator import QueryValidationResult, validate_query
+from app.validation.query_validator import (
+    QueryValidationResult,
+    dob_recognizer,
+    mrn_recognizer,
+    validate_query,
+)
 
 
 def mock_results(*entities):
@@ -100,3 +106,65 @@ def test_person_after_allowlisted_person_is_still_rejected():
         result = validate_query(query)
 
     assert result.is_valid is False
+
+
+# --- Scenario 6: identifier entities are rejected, at any score (ADR-003 revision) ---
+
+@pytest.mark.parametrize("entity_type", ["US_SSN", "UK_NHS", "US_PASSPORT", "US_ITIN", "MRN", "DATE_OF_BIRTH"])
+def test_identifier_entity_is_rejected(entity_type):
+    query = "Patient identifier 943 476 5919 on apixaban, renal dosing?"
+    with patch(
+        "app.validation.query_validator.analyzer.analyze",
+        return_value=mock_results((entity_type, 19, 31, 0.05)),
+    ):
+        result = validate_query(query)
+
+    assert result.is_valid is False
+
+
+def test_allowlist_does_not_suppress_identifier():
+    query = "Xarelto dosing?"
+    with patch(
+        "app.validation.query_validator.analyzer.analyze",
+        return_value=mock_results(("MRN", 0, 7, 0.9)),
+    ):
+        result = validate_query(query)
+
+    assert result.is_valid is False
+
+
+# --- Scenario 7: custom recognizers need a context word; bare numbers/dates pass ---
+
+@pytest.mark.parametrize("text", [
+    "Dosing for patient MRN 00482913?",
+    "medical record number: A-482913, warfarin dose?",
+    "record no. 4829137 metformin",
+])
+def test_mrn_recognizer_matches_with_context(text):
+    assert mrn_recognizer.analyze(text, entities=["MRN"])
+
+
+@pytest.mark.parametrize("text", [
+    "Lot 00482913 of amoxicillin was recalled?",
+    "Max dose of metformin is 2550 mg?",
+])
+def test_mrn_recognizer_ignores_bare_numbers(text):
+    assert not mrn_recognizer.analyze(text, entities=["MRN"])
+
+
+@pytest.mark.parametrize("text", [
+    "Patient born 03/14/1958, max metformin dose?",
+    "DOB: 1958-03-14, renal dosing for apixaban?",
+    "date of birth March 14, 1958 on warfarin",
+    "born on 14 March 1958",
+])
+def test_dob_recognizer_matches_with_context(text):
+    assert dob_recognizer.analyze(text, entities=["DATE_OF_BIRTH"])
+
+
+@pytest.mark.parametrize("text", [
+    "Take amoxicillin for 7 days or 10 days?",
+    "Guideline updated 03/14/2024, what changed?",
+])
+def test_dob_recognizer_ignores_dates_without_context(text):
+    assert not dob_recognizer.analyze(text, entities=["DATE_OF_BIRTH"])
